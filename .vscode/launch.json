@@ -1,0 +1,35 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/stm32h7x.cfg"
+            ],
+            "name": "Cortex Debug",
+            "cwd": "${workspaceFolder}",
+            "debuggerArgs": [
+                "-d",
+                "${workspaceRoot}"
+            ],
+            "device": "STM32H755IB6",
+            "executable": "./build/SeedProtoTest.elf",
+            "interface": "swd",
+            "preRestartCommands": [
+                "load",
+                "enable breakpoint",
+                "monitor reset"
+            ],
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            // "servertype": "jlink",
+            "servertype": "openocd",
+            "showDevDebugOutput": "raw",
+            "svdFile": "${workspaceRoot}/.vscode/STM32H750x.svd",
+        }
+    ]
+}
