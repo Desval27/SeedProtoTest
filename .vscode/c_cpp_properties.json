@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "name": "Daisy",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../include/**",
+                "${workspaceFolder}/../../libDaisy/src/**",
+                "${workspaceFolder}/../../DaisySP/Source/**",
+                "${workspaceFolder}/../../../Monkey/include/**"
+            ],
+            "defines": [
+            ],
+            "compilerPath": "arm-none-eabi-g++.exe",
+            "intelliSenseMode": "${default}",
+            "compilerArgs": [
+                "-mcpu=cortex-m7 ",
+                "-mthumb ",
+                "-mfpu=fpv5-d16 ",
+                "-mfloat-abi=hard "
+            ],
+            "cppStandard": "gnu++14",
+            "cStandard": "c17"
+        }
+    ],
+    "version": 4
+}

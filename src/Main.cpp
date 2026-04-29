@@ -11,26 +11,32 @@ using namespace daisysp;
 using namespace daisy;
 
 #define BPM 60.0f
+#define ENCODER_COUNT 1
+#define BUTTON_COUNT 5
 #define POT_COUNT 4
 
-using TheOverlord = UIOverlord<SSD130xI2c128x64Driver, 1, 0, POT_COUNT, true>;
-using TheTestPage = TestPage<POT_COUNT>;
+using TheOverlord = UIOverlord<SSD130xI2c128x64Driver, ENCODER_COUNT, BUTTON_COUNT, POT_COUNT, true>;
+using TheTestPage = TestPage<ENCODER_COUNT, BUTTON_COUNT, POT_COUNT>;
 
 DaisySeed   hw;
 TheOverlord uiOverlord;
 TheTestPage testPage;
 
-const TheOverlord::EncoderConfig encoderConfig[] = {
+const TheOverlord::EncoderConfig encoderConfig[ENCODER_COUNT] = {
     {seed::D20, seed::D16, seed::D19}, // ENCODER_1
     //     // {seed::D0, seed::D1, seed::D2},   // ENCODER_1
     //     // {seed::D3, seed::D4, seed::D5},   // ENCODER_2
     //     // {seed::D6, seed::D7, seed::D8},   // ENCODER_3
     //     // {seed::D9, seed::D10, seed::D15}, // ENCODER_4
 };
-const TheOverlord::ButtonConfig buttonConfig[] = {
-    {seed::D19},
+const TheOverlord::ButtonConfig buttonConfig[BUTTON_COUNT] = {
+    {seed::D19},  // Encoder
+    {seed::D17},
+    {seed::D18},
+    {seed::D15},
+    {seed::D21},
 };
-const TheOverlord::PotConfig potConfig[] = {
+const TheOverlord::PotConfig potConfig[POT_COUNT] = {
     {seed::A7},
     {seed::A8},
     {seed::A9},
