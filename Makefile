@@ -9,6 +9,9 @@ PLATFORM = DAISY_SEED
 LIBDAISY_DIR ?= ../../libDaisy
 DAISYSP_DIR ?= ../../DaisySP
 
+MONKEY_DIR = ../../../Monkey
+MONKEY_INC = $(MONKEY_DIR)/include
+
 MONKEY_DAYSEYE_DIR = ..
 MONKEY_DAYSEYE_SRC = $(MONKEY_DAYSEYE_DIR)/src
 MONKEY_DAYSEYE_INC = $(MONKEY_DAYSEYE_DIR)/include
@@ -23,10 +26,11 @@ CPP_SOURCES = \
 	$(APP_CPP_SOURCES) \
 	$(MONKEY_DAYSEYE_CPP_SOURCES) \
 	
-C_DEFS += -DDAISY_PLATFORM -DPLATFORM=$(PLATFORM) -Wno-unused-variable -Wno-unused-function
-#OPT = -Og 
-OPT = -Og
-C_INCLUDES += -I$(APP_INC) -I$(MONKEY_DAYSEYE_INC) 
+C_DEFS += -DDAISY_PLATFORM -DPLATFORM=$(PLATFORM) -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable
+OPT = -Og 
+#OPT = -Os
+C_INCLUDES += -I$(APP_INC) -I$(MONKEY_INC) -I$(MONKEY_DAYSEYE_INC) 
+#LDFLAGS += --specs=nosys.specs
 
 .PHONY: garp
 
