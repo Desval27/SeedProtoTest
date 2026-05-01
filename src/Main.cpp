@@ -1,5 +1,3 @@
-// Not a real main....just something to test ideas out with.
-
 #include <daisy_seed.h>
 #include <daisysp.h>
 #include <dev/oled_ssd130x.h>
@@ -20,28 +18,35 @@ using namespace daisy;
 #define BUTTON_COUNT 5
 #define POT_COUNT 4
 
-using TheOverlord =
-    UIOverlord<SSD130xI2c128x64Driver, ENCODER_COUNT, BUTTON_COUNT, POT_COUNT,
-               ENCODER_1, // MenuEncoder
-               BUTTON_1,  // OK Button
-               BUTTON_2,  // Cancel Button
-               true>;
+using TheOverlord = UIOverlord<SSD130xI2c128x64Driver,
+                               ENCODER_COUNT,
+                               BUTTON_COUNT,
+                               POT_COUNT,
+                               ENCODER_1, // MenuEncoder
+                               BUTTON_1,  // OK Button
+                               BUTTON_2,  // Cancel Button
+                               true>;
 using TheTestPage = TestPage<ENCODER_COUNT, BUTTON_COUNT, POT_COUNT>;
 
-DaisySeed hw;
-TheOverlord uiOverlord;
-MainPage mainPage;
+DaisySeed          hw;
+TheOverlord        uiOverlord;
+MainPage           mainPage;
 FullScreenItemMenu mainMenu;
-TheTestPage testPage;
-FullScreenVerticalMenu vertMenu;
-StaticPage staticPage;
+TheTestPage        testPage;
+StaticPage         staticPage;
+
+FullScreenVerticalMenu<MenuFontSize::FONT_NORMAL> vertMenu1;
+FullScreenVerticalMenu<MenuFontSize::FONT_SMALL> vertMenu2;
 
 const TheOverlord::EncoderConfig encoderConfig[ENCODER_COUNT] = {
-    {seed::D20, seed::D16}, // ENCODER_1
+    {seed::D20, seed::D16},
 };
 const TheOverlord::ButtonConfig buttonConfig[BUTTON_COUNT] = {
     {seed::D19}, // Encoder
-    {seed::D17}, {seed::D18}, {seed::D15}, {seed::D21},
+    {seed::D17},
+    {seed::D18},
+    {seed::D15},
+    {seed::D21},
 };
 const TheOverlord::PotConfig potConfig[POT_COUNT] = {
     {seed::A7},
@@ -50,7 +55,7 @@ const TheOverlord::PotConfig potConfig[POT_COUNT] = {
     {seed::A10},
 };
 
-Metro clock;
+Metro   clock;
 HiHat<> hat;
 
 void NOPCallback(void *context) {}
@@ -63,15 +68,18 @@ AbstractMenu::ItemConfig mainMenuItems[] = {
      .text = "CONTROLS",
      .asOpenUiPageItem{&testPage}},
     {.type = AbstractMenu::ItemType::openUiPageItem,
-     .text = "MENU",
-     .asOpenUiPageItem{&vertMenu}},
+     .text = "MENU 1",
+     .asOpenUiPageItem{&vertMenu1}},
+    {.type = AbstractMenu::ItemType::openUiPageItem,
+     .text = "MENU 2",
+     .asOpenUiPageItem{&vertMenu2}},
     {.type = AbstractMenu::ItemType::callbackFunctionItem,
      .text = "ITEM 1",
      .asCallbackFunctionItem{NOPCallback, (void *)1}},
     {.type = AbstractMenu::ItemType::closeMenuItem, .text = "CLOSE"},
 };
 
-static bool checkA = false;
+static bool              checkA          = false;
 AbstractMenu::ItemConfig vertMenuItems[] = {
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "STATIC",
@@ -112,46 +120,59 @@ AbstractMenu::ItemConfig vertMenuItems[] = {
 ////////////////////////////////////////////////////////////////////////////////
 // Main Audio Loop
 ////////////////////////////////////////////////////////////////////////////////
-void AudioCallback(AudioHandle::InterleavingInputBuffer in,
-                   AudioHandle::InterleavingOutputBuffer out, size_t size) {
-  uiOverlord.ProcessControls();
+void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
+                   AudioHandle::InterleavingOutputBuffer out,
+                   size_t                                size)
+{
+    uiOverlord.ProcessControls();
 
-  // Prepare the audio block
-  for (size_t i = 0; i < size; i += 2) {
-    bool trig = clock.Process();
-    float sig = hat.Process(trig);
+    // Prepare the audio block
+    for(size_t i = 0; i < size; i += 2)
+    {
+        bool  trig = clock.Process();
+        float sig  = hat.Process(trig);
 
-    out[i] = sig;
-    out[i + 1] = sig;
-  }
+        out[i]     = sig;
+        out[i + 1] = sig;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-int main(void) {
-  hw.Configure();
-  hw.Init();
+int main(void)
+{
+    hw.Configure();
+    hw.Init();
 
-  hw.StartLog(false);
+    //hw.StartLog(false);
 
-  hw.SetAudioBlockSize(4);
-  hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
+    hw.SetAudioBlockSize(4);
+    hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 
-  float sample_rate = hw.AudioSampleRate();
+    float sample_rate = hw.AudioSampleRate();
 
-  clock.Init(BPM / 60.0f, sample_rate);
-  hat.Init(sample_rate);
+    clock.Init(BPM / 60.0f, sample_rate);
+    hat.Init(sample_rate);
 
-  mainPage.Init(mainMenu);
-  mainMenu.Init(mainMenuItems, ArrayLen(mainMenuItems),
-                AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
-  vertMenu.Init(vertMenuItems, ArrayLen(vertMenuItems),
-                AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
+    mainPage.Init(mainMenu);
+    mainMenu.Init(mainMenuItems,
+                  ArrayLen(mainMenuItems),
+                  AbstractMenu::Orientation::leftRightSelectUpDownModify,
+                  true);
+    vertMenu1.Init(vertMenuItems,
+                  ArrayLen(vertMenuItems),
+                  AbstractMenu::Orientation::leftRightSelectUpDownModify,
+                  true);
+    vertMenu2.Init(vertMenuItems,
+                   ArrayLen(vertMenuItems),
+                   AbstractMenu::Orientation::leftRightSelectUpDownModify,
+                   true);
 
-  uiOverlord.Init(sample_rate, mainPage, &hw.adc, encoderConfig, buttonConfig,
-                  potConfig);
+    uiOverlord.Init(
+        sample_rate, mainPage, &hw.adc, encoderConfig, buttonConfig, potConfig);
 
-  hw.StartAudio(AudioCallback);
-  while (1) {
-    uiOverlord.ProcessUi();
-  }
+    hw.StartAudio(AudioCallback);
+    while(1)
+    {
+        uiOverlord.ProcessUi();
+    }
 }
