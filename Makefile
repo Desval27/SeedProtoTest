@@ -19,12 +19,15 @@ MONKEY_DAYSEYE_CPP_SOURCES = $(wildcard $(MONKEY_DAYSEYE_SRC)/*.cpp)
 
 APP_SRC = src
 APP_INC = include
-APP_CPP_SOURCES := $(wildcard $(APP_SRC)/*.cpp) 
+APP_CPP_SOURCES := $(wildcard $(APP_SRC)/*.cpp)
+APP_C_SOURCES := $(wildcard $(APP_SRC)/*.c)
 
 # Sources
-CPP_SOURCES = \
+CPP_SOURCES += \
 	$(APP_CPP_SOURCES) \
-	$(MONKEY_DAYSEYE_CPP_SOURCES) \
+	$(MONKEY_DAYSEYE_CPP_SOURCES) 
+C_SOURCES += \
+	$(APP_C_SOURCES)	
 	
 C_DEFS += -DDAISY_PLATFORM -DPLATFORM=$(PLATFORM) -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable
 OPT = -Og 
@@ -44,5 +47,6 @@ show_size: # $(BUILD_DIR)/$(TARGET).elf
 	@arm-none-eabi-nm --print-size --size-sort --reverse-sort $(BUILD_DIR)/$(TARGET).elf
 	
 garp:
+	@echo $(C_SOURCES)
 	@echo $(CPP_SOURCES)
 

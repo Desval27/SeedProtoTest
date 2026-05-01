@@ -4,10 +4,13 @@
 
 #include <array>
 
+constexpr int DOUBLE_CLICK_TIMEOUT = 3000;
+
 template <std::size_t ENCODER_COUNT = 1, std::size_t BUTTON_COUNT = 4,
           std::size_t POT_COUNT = 4>
 class TestPage : public BasePage<true> {
 public:
+
   TestPage() : BasePage() {}
 
   bool OnEncoderTurned(uint16_t encoderID, int16_t turns,
@@ -65,7 +68,7 @@ protected:
                     uint32_t nowMS) override {
 
     // Has our OK count expired?
-    if (nowMS - lastOkayMS_ > 3000)
+    if (nowMS - lastOkayMS_ >= DOUBLE_CLICK_TIMEOUT)
     {
       okayCnt_ = 0;
     }
