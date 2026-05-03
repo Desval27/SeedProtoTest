@@ -2,7 +2,7 @@
 
 #include <daisy.h>
 
-#include <BasePage.h>
+#include <Pages/BasePage.h>
 
 class StaticPage : public BasePage<true> {
 public:

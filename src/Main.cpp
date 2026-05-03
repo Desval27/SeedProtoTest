@@ -4,9 +4,11 @@
 
 #include <Monkey.h>
 
-#include <FullScreenVerticalMenu.h>
+#include <Pages/FullScreenVerticalMenu.h>
+#include <Pages/VoicePage.h>
 #include <ShapeItem.h>
 #include <UIOverlord.h>
+#include <BasicApp.h>
 
 #include <MainPage.h>
 #include <StaticPage.h>
@@ -20,6 +22,7 @@ using namespace daisy;
 #define BUTTON_COUNT 5
 #define POT_COUNT 4
 
+using TheApp = BasicApp<1>;
 using TheOverlord =
     UIOverlord<SSD130xI2c128x64Driver, ENCODER_COUNT, BUTTON_COUNT, POT_COUNT,
                ENCODER_1, // MenuEncoder
@@ -32,8 +35,11 @@ DaisySeed hw;
 TheOverlord uiOverlord;
 MainPage mainPage;
 FullScreenItemMenu mainMenu;
+VoicePage voicePage1;
 TheTestPage testPage;
 StaticPage staticPage;
+
+TheApp theApp;
 
 // Custom Items
 ShapeItem shapeItem;
@@ -101,6 +107,9 @@ AbstractMenu::ItemConfig mainMenuItems[] = {
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "MENU 2",
      .asOpenUiPageItem{&vertMenu2}},
+    {.type = AbstractMenu::ItemType::openUiPageItem,
+     .text = "VOICE 1",
+     .asOpenUiPageItem{&voicePage1}},
     {.type = AbstractMenu::ItemType::customItem,
      .text = "SHAPE 1",
      .asCustomItem{&shapeItem}},
@@ -194,6 +203,8 @@ int main(void) {
   clock.Init(BPM / 60.0f, sample_rate);
   hat.Init(sample_rate);
 
+  voicePage1.Init(&theApp.voices[0]);
+
   mainPage.Init(mainMenu);
   mainMenu.Init(mainMenuItems, ArrayLen(mainMenuItems),
                 AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
@@ -201,6 +212,7 @@ int main(void) {
                  AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
   vertMenu2.Init(vertMenuItems, ArrayLen(vertMenuItems),
                  AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
+
 
   uiOverlord.Init(sample_rate, mainPage, &hw.adc, encoderConfig, buttonConfig,
                   potConfig);

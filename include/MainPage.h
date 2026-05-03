@@ -1,6 +1,6 @@
 #pragma once
 
-#include <BasePage.h>
+#include <Pages/BasePage.h>
 #include <daisy.h>
 
 class MainPage : public BasePage<false> {

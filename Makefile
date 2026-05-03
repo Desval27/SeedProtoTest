@@ -15,6 +15,7 @@ MONKEY_INC = $(MONKEY_DIR)/include
 MONKEY_DAYSEYE_DIR = ..
 MONKEY_DAYSEYE_SRC = $(MONKEY_DAYSEYE_DIR)/src
 MONKEY_DAYSEYE_INC = $(MONKEY_DAYSEYE_DIR)/include
+MONKEY_DAYSEYE_C_SOURCES = $(wildcard $(MONKEY_DAYSEYE_SRC)/*.c) 
 MONKEY_DAYSEYE_CPP_SOURCES = $(wildcard $(MONKEY_DAYSEYE_SRC)/*.cpp) 
 
 APP_SRC = src
@@ -27,16 +28,19 @@ CPP_SOURCES += \
 	$(APP_CPP_SOURCES) \
 	$(MONKEY_DAYSEYE_CPP_SOURCES) 
 C_SOURCES += \
-	$(APP_C_SOURCES)	
+	$(APP_C_SOURCES) \
+	$(MONKEY_DAYSEYE_C_SOURCES) 
 	
 C_DEFS += -DDAISY_PLATFORM -DPLATFORM=$(PLATFORM) -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable
 OPT = -Og 
 #OPT = -Os
 C_INCLUDES += -I$(APP_INC) -I$(MONKEY_INC) -I$(MONKEY_DAYSEYE_INC) 
+
+CPP_STANDARD ?= -std=gnu++17
+
 #LDFLAGS += --specs=nosys.specs
 
-.PHONY: garp
-
+.PHONY: show_size garp
 
 # Core location, and generic Makefile.
 SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
