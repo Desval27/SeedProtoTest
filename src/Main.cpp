@@ -4,11 +4,11 @@
 
 #include <Monkey.h>
 
+#include <BasicApp.h>
 #include <Pages/FullScreenVerticalMenu.h>
 #include <Pages/VoicePage.h>
 #include <ShapeItem.h>
 #include <UIOverlord.h>
-#include <BasicApp.h>
 
 #include <MainPage.h>
 #include <StaticPage.h>
@@ -21,55 +21,45 @@ using namespace daisy;
 #define ENCODER_COUNT 1
 #define BUTTON_COUNT 5
 #define POT_COUNT 4
+#define VOICE_COUNT 4
 
-constexpr int VOICE_COUNT = 4;
+using MyApp = BasicApp<VOICE_COUNT>;
+using MyOverlord =
+    UIOverlord<SSD130xI2c128x64Driver, ENCODER_COUNT, BUTTON_COUNT, POT_COUNT,
+               ENCODER_1, // MenuEncoder
+               BUTTON_1,  // OK Button
+               BUTTON_2,  // Cancel Button
+               true>;
+using MyTestPage = TestPage<ENCODER_COUNT, BUTTON_COUNT, POT_COUNT>;
 
-using TheApp      = BasicApp<VOICE_COUNT>;
-using TheOverlord = UIOverlord<SSD130xI2c128x64Driver,
-                               ENCODER_COUNT,
-                               BUTTON_COUNT,
-                               POT_COUNT,
-                               ENCODER_1, // MenuEncoder
-                               BUTTON_1,  // OK Button
-                               BUTTON_2,  // Cancel Button
-                               true>;
-using TheTestPage = TestPage<ENCODER_COUNT, BUTTON_COUNT, POT_COUNT>;
+DaisySeed hw;
+MyApp &theApp = MyApp::instance();
 
-DaisySeed          hw;
-TheOverlord        uiOverlord;
-MainPage           mainPage;
+MyOverlord uiOverlord;
+MainPage mainPage;
+MyTestPage testPage;
+StaticPage staticPage;
+std::array<VoicePage, MyApp::VoiceCount> voicePages;
+
 FullScreenItemMenu mainMenu;
-TheTestPage        testPage;
-StaticPage         staticPage;
-
-std::array<VoicePage, VOICE_COUNT> voicePages;
-
-TheApp theApp;
-
-// Custom Items
-ShapeItem shapeItem;
-
 FullScreenVerticalMenu<MenuFontSize::FONT_NORMAL> vertMenu1;
-FullScreenVerticalMenu<MenuFontSize::FONT_SMALL>  vertMenu2;
+FullScreenVerticalMenu<MenuFontSize::FONT_SMALL> vertMenu2;
 
-const TheOverlord::EncoderConfig encoderConfig[ENCODER_COUNT] = {
+const MyOverlord::EncoderConfig encoderConfig[ENCODER_COUNT] = {
     {seed::D20, seed::D16},
 };
-const TheOverlord::ButtonConfig buttonConfig[BUTTON_COUNT] = {
+const MyOverlord::ButtonConfig buttonConfig[BUTTON_COUNT] = {
     {seed::D19}, // Encoder
-    {seed::D17},
-    {seed::D18},
-    {seed::D15},
-    {seed::D21},
+    {seed::D17}, {seed::D18}, {seed::D15}, {seed::D21},
 };
-const TheOverlord::PotConfig potConfig[POT_COUNT] = {
+const MyOverlord::PotConfig potConfig[POT_COUNT] = {
     {seed::A7},
     {seed::A8},
     {seed::A9},
     {seed::A10},
 };
 
-Metro   clock;
+Metro clock;
 HiHat<> hat;
 
 void NOPCallback(void *context) {}
@@ -87,18 +77,34 @@ AbstractMenu::ItemConfig mainMenuItems[] = {
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "MENU 2",
      .asOpenUiPageItem{&vertMenu2}},
+
+//
+// This is ugly but works for a test app
+//
+
+#if VOICE_COUNT > 0
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "VOICE 1",
      .asOpenUiPageItem{&voicePages[0]}},
+#if VOICE_COUNT > 1
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "VOICE 2",
      .asOpenUiPageItem{&voicePages[1]}},
+#if VOICE_COUNT > 2
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "VOICE 3",
      .asOpenUiPageItem{&voicePages[2]}},
+#if VOICE_COUNT > 3
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "VOICE 4",
      .asOpenUiPageItem{&voicePages[3]}},
+#if VOICE_COUNT > 4
+#error "Unsupported VOICE_COUNT"
+#endif
+#endif
+#endif
+#endif
+#endif
     {.type = AbstractMenu::ItemType::closeMenuItem, .text = "CLOSE"},
 };
 
@@ -106,18 +112,32 @@ AbstractMenu::ItemConfig vertMenuItems[] = {
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "STATIC",
      .asOpenUiPageItem{&staticPage}},
+//
+// This is ugly but works for a test app
+//
+#if VOICE_COUNT > 0
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "VOICE 1",
      .asOpenUiPageItem{&voicePages[0]}},
+#if VOICE_COUNT > 1
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "VOICE 2",
      .asOpenUiPageItem{&voicePages[1]}},
+#if VOICE_COUNT > 2
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "VOICE 3",
      .asOpenUiPageItem{&voicePages[2]}},
+#if VOICE_COUNT > 3
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "VOICE 4",
      .asOpenUiPageItem{&voicePages[3]}},
+#if VOICE_COUNT > 4
+#error "Unsupported VOICE_COUNT"
+#endif
+#endif
+#endif
+#endif
+#endif
     {.type = AbstractMenu::ItemType::callbackFunctionItem,
      .text = "ITEM 3",
      .asCallbackFunctionItem{NOPCallback, (void *)3}},
@@ -148,63 +168,63 @@ AbstractMenu::ItemConfig vertMenuItems[] = {
 ////////////////////////////////////////////////////////////////////////////////
 // Main Audio Loop
 ////////////////////////////////////////////////////////////////////////////////
-void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
-                   AudioHandle::InterleavingOutputBuffer out,
-                   size_t                                size)
-{
-    uiOverlord.ProcessControls();
+void AudioCallback(AudioHandle::InterleavingInputBuffer in,
+                   AudioHandle::InterleavingOutputBuffer out, size_t size) {
+  uiOverlord.ProcessControls();
 
-    // Prepare the audio block
-    for(size_t i = 0; i < size; i += 2)
-    {
-        bool  trig = clock.Process();
-        float sig  = hat.Process(trig);
+  // Prepare the audio block
+  for (size_t i = 0; i < size; i += 2) {
+    bool trig = clock.Process();
 
-        out[i]     = sig;
-        out[i + 1] = sig;
-    }
+    // float sigL = 0.0f;
+    // float sigR = 0.0f;
+    //float sig = hat.Process(trig);
+    auto [sigL, sigR] = theApp.Process();
+
+    out[i] = sigL;
+    out[i + 1] = sigR;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-int main(void)
-{
-    hw.Configure();
-    hw.Init();
+void InitComponents(float sample_rate) {
+  theApp.Init(sample_rate);
+  clock.Init(BPM / 60.0f, sample_rate);
+  hat.Init(sample_rate);
+}
 
-    // hw.StartLog(false);
+////////////////////////////////////////////////////////////////////////////////
+void InitUi(float sample_rate) {
+  for (std::size_t i = 0; i < theApp.VoiceCount; i++)
+    voicePages[i].Init(theApp.GetVoicePtr(i));
 
-    hw.SetAudioBlockSize(4);
-    hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
+  mainPage.Init(mainMenu);
+  mainMenu.Init(mainMenuItems, ArrayLen(mainMenuItems),
+                AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
+  vertMenu1.Init(vertMenuItems, ArrayLen(vertMenuItems),
+                 AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
+  vertMenu2.Init(vertMenuItems, ArrayLen(vertMenuItems),
+                 AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
 
-    float sample_rate = hw.AudioSampleRate();
+  uiOverlord.Init(sample_rate, mainPage, &hw.adc, encoderConfig, buttonConfig,
+                  potConfig);
+}
 
-    clock.Init(BPM / 60.0f, sample_rate);
-    hat.Init(sample_rate);
+////////////////////////////////////////////////////////////////////////////////
+int main(void) {
+  hw.Configure();
+  hw.Init();
 
-    for (int i = 0; i < VOICE_COUNT; i++)
-        voicePages[i].Init(&theApp.voices[i]);
+  hw.SetAudioBlockSize(4);
+  hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 
-    mainPage.Init(mainMenu);
-    mainMenu.Init(mainMenuItems,
-                  ArrayLen(mainMenuItems),
-                  AbstractMenu::Orientation::leftRightSelectUpDownModify,
-                  true);
-    vertMenu1.Init(vertMenuItems,
-                   ArrayLen(vertMenuItems),
-                   AbstractMenu::Orientation::leftRightSelectUpDownModify,
-                   true);
-    vertMenu2.Init(vertMenuItems,
-                   ArrayLen(vertMenuItems),
-                   AbstractMenu::Orientation::leftRightSelectUpDownModify,
-                   true);
+  float sample_rate = hw.AudioSampleRate();
+  InitComponents(sample_rate);
+  InitUi(sample_rate);
 
-
-    uiOverlord.Init(
-        sample_rate, mainPage, &hw.adc, encoderConfig, buttonConfig, potConfig);
-
-    hw.StartAudio(AudioCallback);
-    while(1)
-    {
-        uiOverlord.ProcessUi();
-    }
+  hw.StartAudio(AudioCallback);
+  while (1) {
+    uiOverlord.ProcessUi(); // Update all Ui elements and and event queues.
+    theApp.Update(System::GetNow());
+  }
 }
