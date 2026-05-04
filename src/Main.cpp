@@ -22,38 +22,45 @@ using namespace daisy;
 #define BUTTON_COUNT 5
 #define POT_COUNT 4
 
-using TheApp = BasicApp<1>;
-using TheOverlord =
-    UIOverlord<SSD130xI2c128x64Driver, ENCODER_COUNT, BUTTON_COUNT, POT_COUNT,
-               ENCODER_1, // MenuEncoder
-               BUTTON_1,  // OK Button
-               BUTTON_2,  // Cancel Button
-               true>;
+constexpr int VOICE_COUNT = 4;
+
+using TheApp      = BasicApp<VOICE_COUNT>;
+using TheOverlord = UIOverlord<SSD130xI2c128x64Driver,
+                               ENCODER_COUNT,
+                               BUTTON_COUNT,
+                               POT_COUNT,
+                               ENCODER_1, // MenuEncoder
+                               BUTTON_1,  // OK Button
+                               BUTTON_2,  // Cancel Button
+                               true>;
 using TheTestPage = TestPage<ENCODER_COUNT, BUTTON_COUNT, POT_COUNT>;
 
-DaisySeed hw;
-TheOverlord uiOverlord;
-MainPage mainPage;
+DaisySeed          hw;
+TheOverlord        uiOverlord;
+MainPage           mainPage;
 FullScreenItemMenu mainMenu;
-VoicePage voicePage1;
-TheTestPage testPage;
-StaticPage staticPage;
+TheTestPage        testPage;
+StaticPage         staticPage;
+
+std::array<VoicePage, VOICE_COUNT> voicePages;
 
 TheApp theApp;
 
 // Custom Items
 ShapeItem shapeItem;
 
-
 FullScreenVerticalMenu<MenuFontSize::FONT_NORMAL> vertMenu1;
-FullScreenVerticalMenu<MenuFontSize::FONT_SMALL> vertMenu2;
+FullScreenVerticalMenu<MenuFontSize::FONT_SMALL>  vertMenu2;
 
 const TheOverlord::EncoderConfig encoderConfig[ENCODER_COUNT] = {
     {seed::D20, seed::D16},
 };
 const TheOverlord::ButtonConfig buttonConfig[BUTTON_COUNT] = {
     {seed::D19}, // Encoder
-    {seed::D17}, {seed::D18}, {seed::D15}, {seed::D21},
+    {seed::D17},
+    {seed::D18},
+    {seed::D15},
+    {seed::D21},
 };
 const TheOverlord::PotConfig potConfig[POT_COUNT] = {
     {seed::A7},
@@ -62,37 +69,10 @@ const TheOverlord::PotConfig potConfig[POT_COUNT] = {
     {seed::A10},
 };
 
-Metro clock;
+Metro   clock;
 HiHat<> hat;
 
 void NOPCallback(void *context) {}
-
-MappedFloatValue volume(1.0f, 100.0f, 100.f, MappedFloatValue::Mapping::log,
-                        "%");
-
-        // WAVE_SIN,
-        // WAVE_TRI,
-        // WAVE_SAW,
-        // WAVE_RAMP,
-        // WAVE_SQUARE,
-        // WAVE_POLYBLEP_TRI,
-        // WAVE_POLYBLEP_SAW,
-        // WAVE_POLYBLEP_SQUARE,
-        // WAVE_LAST,
-
-const char* OSC_SHAPES[] = {
-    "SIN",
-    "TRIANGLE",
-    "SAW",
-    "RAMP",
-    "SQUARE",
-    "POLYBLEP TRI",
-    "POLYBLEP SAW",
-    "POLYBLEP SQUARE",
-};
-
-MappedStringListValue oscShape(OSC_SHAPES, ArrayLen(OSC_SHAPES), 0);                        
-bool checkA = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 // UI & Menu Structure
@@ -109,19 +89,16 @@ AbstractMenu::ItemConfig mainMenuItems[] = {
      .asOpenUiPageItem{&vertMenu2}},
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "VOICE 1",
-     .asOpenUiPageItem{&voicePage1}},
-    {.type = AbstractMenu::ItemType::customItem,
-     .text = "SHAPE 1",
-     .asCustomItem{&shapeItem}},
-    {.type = AbstractMenu::ItemType::valueItem,
-     .text = "SHAPE 2",
-     .asMappedValueItem{&oscShape}},
-    {.type = AbstractMenu::ItemType::valueItem,
-     .text = "VOLUME",
-     .asMappedValueItem{&volume}},
-    {.type = AbstractMenu::ItemType::callbackFunctionItem,
-     .text = "ITEM 1",
-     .asCallbackFunctionItem{NOPCallback, (void *)1}},
+     .asOpenUiPageItem{&voicePages[0]}},
+    {.type = AbstractMenu::ItemType::openUiPageItem,
+     .text = "VOICE 2",
+     .asOpenUiPageItem{&voicePages[1]}},
+    {.type = AbstractMenu::ItemType::openUiPageItem,
+     .text = "VOICE 3",
+     .asOpenUiPageItem{&voicePages[2]}},
+    {.type = AbstractMenu::ItemType::openUiPageItem,
+     .text = "VOICE 4",
+     .asOpenUiPageItem{&voicePages[3]}},
     {.type = AbstractMenu::ItemType::closeMenuItem, .text = "CLOSE"},
 };
 
@@ -129,21 +106,18 @@ AbstractMenu::ItemConfig vertMenuItems[] = {
     {.type = AbstractMenu::ItemType::openUiPageItem,
      .text = "STATIC",
      .asOpenUiPageItem{&staticPage}},
-    {.type = AbstractMenu::ItemType::callbackFunctionItem,
-     .text = "ITEM 2",
-     .asCallbackFunctionItem{NOPCallback, (void *)2}},
-    {.type = AbstractMenu::ItemType::checkboxItem,
-     .text = "CHECK A",
-     .asCheckboxItem{&checkA}},
-    {.type = AbstractMenu::ItemType::customItem,
-     .text = "SHAPE 1",
-     .asCustomItem{&shapeItem}},
-    {.type = AbstractMenu::ItemType::valueItem,
-     .text = "SHAPE 2",
-     .asMappedValueItem{&oscShape}},
-    {.type = AbstractMenu::ItemType::valueItem,
-     .text = "VOLUME",
-     .asMappedValueItem{&volume}},
+    {.type = AbstractMenu::ItemType::openUiPageItem,
+     .text = "VOICE 1",
+     .asOpenUiPageItem{&voicePages[0]}},
+    {.type = AbstractMenu::ItemType::openUiPageItem,
+     .text = "VOICE 2",
+     .asOpenUiPageItem{&voicePages[1]}},
+    {.type = AbstractMenu::ItemType::openUiPageItem,
+     .text = "VOICE 3",
+     .asOpenUiPageItem{&voicePages[2]}},
+    {.type = AbstractMenu::ItemType::openUiPageItem,
+     .text = "VOICE 4",
+     .asOpenUiPageItem{&voicePages[3]}},
     {.type = AbstractMenu::ItemType::callbackFunctionItem,
      .text = "ITEM 3",
      .asCallbackFunctionItem{NOPCallback, (void *)3}},
@@ -174,51 +148,63 @@ AbstractMenu::ItemConfig vertMenuItems[] = {
 ////////////////////////////////////////////////////////////////////////////////
 // Main Audio Loop
 ////////////////////////////////////////////////////////////////////////////////
-void AudioCallback(AudioHandle::InterleavingInputBuffer in,
-                   AudioHandle::InterleavingOutputBuffer out, size_t size) {
-  uiOverlord.ProcessControls();
+void AudioCallback(AudioHandle::InterleavingInputBuffer  in,
+                   AudioHandle::InterleavingOutputBuffer out,
+                   size_t                                size)
+{
+    uiOverlord.ProcessControls();
 
-  // Prepare the audio block
-  for (size_t i = 0; i < size; i += 2) {
-    bool trig = clock.Process();
-    float sig = hat.Process(trig);
+    // Prepare the audio block
+    for(size_t i = 0; i < size; i += 2)
+    {
+        bool  trig = clock.Process();
+        float sig  = hat.Process(trig);
 
-    out[i] = sig;
-    out[i + 1] = sig;
-  }
+        out[i]     = sig;
+        out[i + 1] = sig;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-int main(void) {
-  hw.Configure();
-  hw.Init();
+int main(void)
+{
+    hw.Configure();
+    hw.Init();
 
-  // hw.StartLog(false);
+    // hw.StartLog(false);
 
-  hw.SetAudioBlockSize(4);
-  hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
+    hw.SetAudioBlockSize(4);
+    hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 
-  float sample_rate = hw.AudioSampleRate();
+    float sample_rate = hw.AudioSampleRate();
 
-  clock.Init(BPM / 60.0f, sample_rate);
-  hat.Init(sample_rate);
+    clock.Init(BPM / 60.0f, sample_rate);
+    hat.Init(sample_rate);
 
-  voicePage1.Init(&theApp.voices[0]);
+    for (int i = 0; i < VOICE_COUNT; i++)
+        voicePages[i].Init(&theApp.voices[i]);
 
-  mainPage.Init(mainMenu);
-  mainMenu.Init(mainMenuItems, ArrayLen(mainMenuItems),
-                AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
-  vertMenu1.Init(vertMenuItems, ArrayLen(vertMenuItems),
-                 AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
-  vertMenu2.Init(vertMenuItems, ArrayLen(vertMenuItems),
-                 AbstractMenu::Orientation::leftRightSelectUpDownModify, true);
+    mainPage.Init(mainMenu);
+    mainMenu.Init(mainMenuItems,
+                  ArrayLen(mainMenuItems),
+                  AbstractMenu::Orientation::leftRightSelectUpDownModify,
+                  true);
+    vertMenu1.Init(vertMenuItems,
+                   ArrayLen(vertMenuItems),
+                   AbstractMenu::Orientation::leftRightSelectUpDownModify,
+                   true);
+    vertMenu2.Init(vertMenuItems,
+                   ArrayLen(vertMenuItems),
+                   AbstractMenu::Orientation::leftRightSelectUpDownModify,
+                   true);
 
 
-  uiOverlord.Init(sample_rate, mainPage, &hw.adc, encoderConfig, buttonConfig,
-                  potConfig);
+    uiOverlord.Init(
+        sample_rate, mainPage, &hw.adc, encoderConfig, buttonConfig, potConfig);
 
-  hw.StartAudio(AudioCallback);
-  while (1) {
-    uiOverlord.ProcessUi();
-  }
+    hw.StartAudio(AudioCallback);
+    while(1)
+    {
+        uiOverlord.ProcessUi();
+    }
 }
