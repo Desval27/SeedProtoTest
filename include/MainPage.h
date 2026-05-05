@@ -1,16 +1,26 @@
 #pragma once
 
-
-#include <daisy.h>
 #include <BasicApp.h>
 #include <Pages/BasePage.h>
+#include <daisy.h>
 
 class MainPage : public BasePage<true> {
 public:
+  /////////////////////////////////////////////////////////////////////////////
+  /// @brief 
   MainPage() : BasePage(), startPage_(nullptr) {}
 
+  /////////////////////////////////////////////////////////////////////////////
+  /// @brief 
+  /// @param startPage 
   void Init(daisy::UiPage &startPage) { startPage_ = &startPage; }
 
+  /////////////////////////////////////////////////////////////////////////////
+  /// @brief 
+  /// @param buttonID 
+  /// @param numberOfPresses 
+  /// @param isRetriggering 
+  /// @return 
   bool OnButton(uint16_t buttonID, uint8_t numberOfPresses,
                 bool isRetriggering) override {
     if (buttonID == BUTTON_1) {
@@ -22,8 +32,12 @@ public:
     return true;
   }
 
-  bool OnPotMoved(uint16_t potID, float newPosition) override
-  {
+  /////////////////////////////////////////////////////////////////////////////
+  /// @brief 
+  /// @param potID 
+  /// @param newPosition 
+  /// @return 
+  bool OnPotMoved(uint16_t potID, float newPosition) override {
     // Pot id corresponds to voice id
     BasicApp<4> &theApp = BasicApp<4>::instance();
     auto *v = theApp.GetVoicePtr(potID);
@@ -31,9 +45,14 @@ public:
     return true;
   }
 
+protected:
 
-    protected : void InternalDraw(daisy::OneBitGraphicsDisplay &display,
-                                  uint32_t nowMS) override {
+  /////////////////////////////////////////////////////////////////////////////
+  /// @brief 
+  /// @param display 
+  /// @param nowMS 
+  void InternalDraw(daisy::OneBitGraphicsDisplay &display,
+                    uint32_t nowMS) override {
     uint16_t h = display.GetBounds().GetHeight() / 2;
     daisy::Rectangle rect = display.GetBounds().WithHeight(h);
     display.SetCursor(26, 0);

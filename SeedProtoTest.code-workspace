@@ -4,13 +4,13 @@
 			"path": "."
 		},
 		{
-			"path": "../../libDaisy/src"
-		},
-		{
 			"path": ".."
 		},
 		{
-			"path": "../../seed"
+			"path": "../../../Monkey"
+		},
+		{
+			"path": "../ChoirSATB"
 		}
 	],
 	"settings": {}

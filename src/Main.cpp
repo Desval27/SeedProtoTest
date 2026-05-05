@@ -187,6 +187,8 @@ void AudioCallback(AudioHandle::InterleavingInputBuffer in,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// @brief 
+/// @param sample_rate 
 void InitComponents(float sample_rate) {
   theApp.Init(sample_rate);
   clock.Init(BPM / 60.0f, sample_rate);
@@ -194,6 +196,8 @@ void InitComponents(float sample_rate) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// @brief 
+/// @param sample_rate 
 void InitUi(float sample_rate) {
   for (std::size_t i = 0; i < theApp.VoiceCount; i++)
     voicePages[i].Init(theApp.GetVoicePtr(i));
@@ -211,6 +215,9 @@ void InitUi(float sample_rate) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// @brief 
+/// @param  
+/// @return 
 int main(void) {
   hw.Configure();
   hw.Init();
