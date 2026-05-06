@@ -4,12 +4,12 @@
 
 #include <Monkey.h>
 
-#include <BasicApp.h>
 #include <Pages/FullScreenVerticalMenu.h>
-#include <Pages/VoicePage.h>
+#include <Pages/SynthVoicePage.h>
 #include <ShapeItem.h>
 #include <UIOverlord.h>
 
+#include <App.h>
 #include <MainPage.h>
 #include <StaticPage.h>
 #include <TestPage.h>
@@ -23,7 +23,7 @@ using namespace daisy;
 #define POT_COUNT 4
 #define VOICE_COUNT 4
 
-using MyApp = BasicApp<VOICE_COUNT>;
+using MyApp = App;
 using MyOverlord =
     UIOverlord<SSD130xI2c128x64Driver, ENCODER_COUNT, BUTTON_COUNT, POT_COUNT,
                ENCODER_1, // MenuEncoder
@@ -33,13 +33,13 @@ using MyOverlord =
 using MyTestPage = TestPage<ENCODER_COUNT, BUTTON_COUNT, POT_COUNT>;
 
 DaisySeed hw;
-MyApp &theApp = MyApp::instance();
+MyApp &theApp = MyApp::getInstance();
 
 MyOverlord uiOverlord;
 MainPage mainPage;
 MyTestPage testPage;
 StaticPage staticPage;
-std::array<VoicePage, MyApp::VoiceCount> voicePages;
+std::array<SynthVoicePage, MyApp::VoiceCount> voicePages;
 
 FullScreenItemMenu mainMenu;
 FullScreenVerticalMenu<MenuFontSize::FONT_NORMAL> vertMenu1;
