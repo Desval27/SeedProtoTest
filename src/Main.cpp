@@ -23,20 +23,21 @@ using namespace daisy;
 #define POT_COUNT 4
 #define VOICE_COUNT 4
 
-using MyApp = App;
+using MyApp = App<VOICE_COUNT>;
 using MyOverlord =
     UIOverlord<SSD130xI2c128x64Driver, ENCODER_COUNT, BUTTON_COUNT, POT_COUNT,
                ENCODER_1, // MenuEncoder
                BUTTON_1,  // OK Button
                BUTTON_2,  // Cancel Button
                true>;
+using MyMainPage = MainPage<MyApp>;
 using MyTestPage = TestPage<ENCODER_COUNT, BUTTON_COUNT, POT_COUNT>;
 
 DaisySeed hw;
 MyApp &theApp = MyApp::getInstance();
 
 MyOverlord uiOverlord;
-MainPage mainPage;
+MyMainPage mainPage;
 MyTestPage testPage;
 StaticPage staticPage;
 std::array<SynthVoicePage, MyApp::VoiceCount> voicePages;

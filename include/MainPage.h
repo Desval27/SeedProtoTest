@@ -4,6 +4,7 @@
 #include <Pages/BasePage.h>
 #include <daisy.h>
 
+template <typename AppType>
 class MainPage : public BasePage<true>
 {
   public:
@@ -44,7 +45,7 @@ class MainPage : public BasePage<true>
     bool OnPotMoved(uint16_t potID, float newPosition) override
     {
         // Pot id corresponds to voice id
-        App  &theApp = App::getInstance();
+        AppType &theApp = AppType::getInstance();
         auto *v      = theApp.GetVoicePtr(potID);
         v->config_.volume.SetFrom0to1(newPosition);
         return true;
