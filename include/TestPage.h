@@ -6,15 +6,21 @@
 
 constexpr int DOUBLE_CLICK_TIMEOUT = 3000;
 
-template <std::size_t ENCODER_COUNT = 1, std::size_t BUTTON_COUNT = 4,
-          std::size_t POT_COUNT = 4>
-class TestPage : public BasePage<true> {
+template<std::size_t ENCODER_COUNT = 1,
+         std::size_t BUTTON_COUNT = 4,
+         std::size_t POT_COUNT = 4>
+class TestPage : public BasePage<true>
+{
 public:
+  TestPage()
+    : BasePage()
+  {
+  }
 
-  TestPage() : BasePage() {}
-
-  bool OnEncoderTurned(uint16_t encoderID, int16_t turns,
-                       uint16_t stepsPerRevolution) override {
+  bool OnEncoderTurned(uint16_t encoderID,
+                       int16_t turns,
+                       uint16_t stepsPerRevolution) override
+  {
     if (encoderID < ENCODER_COUNT) {
       encoderValues[encoderID] = turns;
       encoderSteps[encoderID] = stepsPerRevolution;
@@ -24,7 +30,8 @@ public:
   }
 
   bool OnEncoderActivityChanged(uint16_t encoderID,
-                                bool isCurrentlyActive) override {
+                                bool isCurrentlyActive) override
+  {
     if (encoderID < ENCODER_COUNT) {
       if (!isCurrentlyActive) {
         encoderValues[encoderID] = 0;
@@ -35,14 +42,16 @@ public:
     return false;
   }
 
-  bool OnButton(uint16_t buttonID, uint8_t numberOfPresses,
-                bool isRetriggering) override {
+  bool OnButton(uint16_t buttonID,
+                uint8_t numberOfPresses,
+                bool isRetriggering) override
+  {
     // Menu encoder button retriggering = close
     if ((buttonID == GetParentUI()->GetSpecialControlIds().okBttnId) &&
         numberOfPresses > 0 && !isRetriggering) {
       okayCnt_++;
       if ((okayCnt_ == 2) && IsActive())
-         Close();
+        Close();
       else
         lastOkayMS_ = daisy::System::GetNow();
     }
@@ -55,7 +64,8 @@ public:
     return false;
   }
 
-  bool OnPotMoved(uint16_t potID, float newPosition) override {
+  bool OnPotMoved(uint16_t potID, float newPosition) override
+  {
     if (potID < POT_COUNT) {
       potValues[potID] = newPosition;
       return true;
@@ -64,12 +74,12 @@ public:
   }
 
 protected:
-  void InternalDraw(daisy::OneBitGraphicsDisplay &display,
-                    uint32_t nowMS) override {
+  void InternalDraw(daisy::OneBitGraphicsDisplay& display,
+                    uint32_t nowMS) override
+  {
 
     // Has our OK count expired?
-    if (nowMS - lastOkayMS_ >= DOUBLE_CLICK_TIMEOUT)
-    {
+    if (nowMS - lastOkayMS_ >= DOUBLE_CLICK_TIMEOUT) {
       okayCnt_ = 0;
     }
 
@@ -77,7 +87,7 @@ protected:
 
     int16_t lineY = 0;
     uint16_t textH = fd.FontHeight + 1;
-    display.SetCursor((128-12*7)/2, 0);
+    display.SetCursor((128 - 12 * 7) / 2, 0);
     display.WriteString("CONTROL TEST", Font_7x10, true);
     lineY += textH + 2;
 
@@ -138,7 +148,7 @@ protected:
     }
 
     if (okayCnt_ > 0) {
-      display.SetCursor((128 -20*6)/2, lineY);
+      display.SetCursor((128 - 20 * 6) / 2, lineY);
       display.WriteString("PRESS AGAIN TO EXIT", Font_6x8, true);
     }
   }
