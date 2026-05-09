@@ -2,7 +2,7 @@
 #include <daisysp.h>
 #include <dev/oled_ssd130x.h>
 
-#include <Monkey.h>
+#include <monkey.hpp>
 
 #include <Pages/FullScreenVerticalMenu.h>
 #include <Pages/SynthVoicePage.h>
@@ -36,7 +36,7 @@ using MyMainPage = MainPage<MyApp>;
 using MyTestPage = TestPage<ENCODER_COUNT, BUTTON_COUNT, POT_COUNT>;
 
 DaisySeed hw;
-MyApp& theApp = MyApp::getInstance();
+MyApp& theApp = MyApp::get_instance();
 
 MyOverlord uiOverlord;
 MyMainPage mainPage;
@@ -188,7 +188,7 @@ AudioCallback(AudioHandle::InterleavingInputBuffer in,
     // float sigL = 0.0f;
     // float sigR = 0.0f;
     // float sig = hat.Process(trig);
-    auto [sigL, sigR] = theApp.Process(trig);
+    auto [sigL, sigR] = theApp.process(trig);
 
     out[i] = sigL;
     out[i + 1] = sigR;
@@ -201,7 +201,7 @@ AudioCallback(AudioHandle::InterleavingInputBuffer in,
 void
 InitComponents(float sample_rate)
 {
-  theApp.Init(sample_rate);
+  theApp.init(sample_rate);
   clock.Init(BPM / 60.0f, sample_rate);
   hat.Init(sample_rate);
 }
@@ -213,7 +213,7 @@ void
 InitUi(float sample_rate)
 {
   for (std::size_t i = 0; i < theApp.VoiceCount; i++)
-    voicePages[i].Init(theApp.GetVoicePtr(i));
+    voicePages[i].Bind(theApp.GetVoicePtr(i)->config_);
 
   mainPage.Init(mainMenu);
   mainMenu.Init(mainMenuItems,
@@ -253,6 +253,6 @@ main(void)
   hw.StartAudio(AudioCallback);
   while (1) {
     uiOverlord.ProcessUi(); // Update all Ui elements and and event queues.
-    theApp.Update(System::GetNow());
+    theApp.update(System::GetNow());
   }
 }
