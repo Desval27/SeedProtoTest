@@ -48,9 +48,9 @@ public:
   bool OnPotMoved(uint16_t potID, float newPosition) override
   {
     // Pot id corresponds to voice id
-    AppType& theApp = AppType::get_instance();
-    auto* v = theApp.GetVoicePtr(potID);
-    v->config_.volume.SetFrom0to1(newPosition);
+    // AppType& theApp = AppType::get_instance();
+    // auto* v = theApp.GetVoicePtr(potID);
+    // v->config_.volume.SetFrom0to1(newPosition);
     return true;
   }
 
