@@ -1,7 +1,7 @@
 #pragma once
 
-#include <BasicApp.h>
-#include <SynthVoice.h>
+#include <basic_app.hpp>
+#include <synth_voice.hpp>
 #include <singleton.hpp>
 
 template<std::size_t VOICE_COUNT,

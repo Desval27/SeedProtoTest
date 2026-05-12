@@ -6,8 +6,8 @@
 
 #include <Pages/FullScreenVerticalMenu.h>
 #include <Pages/SynthVoicePage.h>
-#include <ShapeItem.h>
-#include <UIOverlord.h>
+#include <shape_item.hpp>
+#include <ui_overlord.hpp>
 
 #include <MainPage.h>
 #include <SeedProtoTestApp.h>
