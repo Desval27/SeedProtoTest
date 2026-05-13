@@ -18,10 +18,10 @@ public:
     // dy1 = +1;
     // dx2 = -1;
     // dy2 = -1;
-    // dx1_ = d[randomRange(0, 1)];
-    // dy1_ = d[randomRange(0, 1)];
-    // dx2_ = d[randomRange(0, 1)];
-    // dy2_ = d[randomRange(0, 1)];
+    // dx1_ = d[random_range(0, 1)];
+    // dy1_ = d[random_range(0, 1)];
+    // dx2_ = d[random_range(0, 1)];
+    // dy2_ = d[random_range(0, 1)];
   }
 
   ///////////////////////////////////////////////////////////////////////////

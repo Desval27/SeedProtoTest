@@ -217,15 +217,15 @@ InitUi(float sample_rate)
 
   mainPage.Init(mainMenu);
   mainMenu.Init(mainMenuItems,
-                ArrayLen(mainMenuItems),
+                array_len(mainMenuItems),
                 AbstractMenu::Orientation::leftRightSelectUpDownModify,
                 true);
   vertMenu1.Init(vertMenuItems,
-                 ArrayLen(vertMenuItems),
+                 array_len(vertMenuItems),
                  AbstractMenu::Orientation::leftRightSelectUpDownModify,
                  true);
   vertMenu2.Init(vertMenuItems,
-                 ArrayLen(vertMenuItems),
+                 array_len(vertMenuItems),
                  AbstractMenu::Orientation::leftRightSelectUpDownModify,
                  true);
 
